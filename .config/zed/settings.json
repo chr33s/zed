@@ -1,0 +1,56 @@
+{
+  "edit_predictions": {
+    "provider": "copilot"
+  },
+  "agent": {
+    "default_model": {
+      "provider": "copilot_chat",
+      "model": "gpt-5.4",
+      "enable_thinking": true
+    },
+    "enable_feedback": false,
+    "tool_permissions": {
+      "default": "allow"
+    }
+  },
+  "terminal": {
+    "font_size": 12.0,
+    "font_family": "FiraCode Nerd Font",
+    "font_fallbacks": ["Menlo", "Monaco", "Courier New"],
+    "max_scroll_history_lines": 100000
+  },
+  "telemetry": {
+    "diagnostics": false,
+    "metrics": false
+  },
+  "base_keymap": "VSCode",
+  "sticky_scroll": {
+    "enabled": true
+  },
+  "minimap": {
+    "show": "never"
+  },
+  "use_system_window_tabs": true,
+  "buffer_font_fallbacks": ["Menlo", "Monaco", "Courier New"],
+  "buffer_font_family": "Fira Code",
+  "file_types": {
+    "properties": [".env*", ".*vars"]
+  },
+  "colorize_brackets": true,
+  "show_whitespaces": "all",
+  "show_edit_predictions": false,
+  "remove_trailing_whitespace_on_save": false,
+  "tab_size": 2,
+  "agent_servers": {
+    "github-copilot-cli": {
+      "type": "registry"
+    }
+  },
+  "ui_font_size": 15.0,
+  "buffer_font_size": 12.0,
+  "theme": {
+    "mode": "system",
+    "light": "One Light",
+    "dark": "One Dark"
+  }
+}
