@@ -1,0 +1,7 @@
+id = "chr33s-zed"
+name = "Zed Extensions"
+version = "0.0.0"
+schema_version = 1
+authors = ["Chris"]
+description = "Extensions for Zed"
+repository = "https://github.com/chr33s/zed"
