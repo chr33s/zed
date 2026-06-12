@@ -1,0 +1,77 @@
+name: Extensions
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+on:
+  schedule:
+    - cron: "0 9 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  security-events: write
+
+jobs:
+  sync:
+    name: Sync
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - run: .github/scripts/sync
+
+      # Scan the freshly vendored sources for vulnerabilities before building.
+      - uses: github/codeql-action/init@v4
+        with:
+          languages: rust, c-cpp
+          build-mode: none
+          config: |
+            paths:
+              - extensions
+
+      - uses: github/codeql-action/analyze@v4
+        with:
+          output: codeql-results
+
+      # Gate the build: fail on any error-severity CodeQL alert.
+      - run: |
+          set -euo pipefail
+          errors=0
+          for f in codeql-results/*.sarif; do
+            [ -e "$f" ] || continue
+            n="$(jq '
+              [ .runs[]
+                | . as $run
+                | ( [ (($run.tool.driver.rules // [])[]),
+                      (($run.tool.extensions[]?.rules // [])[]) ]
+                    | map({ key: .id, value: (.defaultConfiguration.level // "warning") })
+                    | from_entries ) as $rules
+                | ($run.results // [])[]
+                | (.level // $rules[.ruleId] // "warning")
+              ] | map(select(. == "error")) | length' "$f")"
+            errors=$((errors + n))
+          done
+          echo "CodeQL error-severity alerts: $errors"
+          if [ "$errors" -gt 0 ]; then
+            echo "::error::CodeQL found $errors error-severity alert(s); failing before build."
+            exit 1
+          fi
+
+      - run: .github/scripts/build
+
+      - run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A extensions extensions.json
+          [ -f .gitmodules ] && git add .gitmodules
+          if git diff --cached --quiet; then
+            echo "No changes to vendored extensions."
+          else
+            git commit -m "chore(extensions): sync vendored extensions"
+            git push
+          fi

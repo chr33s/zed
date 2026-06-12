@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# Recompile changed Zed extensions to extension.wasm.
+#
+# Builds with the wasm32-wasip2 target, which is how Zed compiles
+# zed_extension_api extensions (the output is a WASI component). An extension is
+# rebuilt only when its locked commit in extensions.json changed versus git
+# HEAD, or it has no committed extension.wasm yet; otherwise the previously
+# built artifact is restored unchanged. extension.wasm is git-ignored upstream,
+# so it is force-added. Run from the repository root, after sync.
+set -euo pipefail
+
+manifest="extensions.json"
+target="wasm32-wasip2"
+
+command -v cargo >/dev/null || { echo "cargo not found" >&2; exit 1; }
+rustup target add "$target" >/dev/null 2>&1 || true
+
+# Locked commit recorded for <name> in an extensions.json lock file.
+commit_of() { # <json-file> <name>
+  jq -r --arg n "$2" 'map(select(.name == $n)) | (.[0].commit // "")' "$1" 2>/dev/null || true
+}
+
+old_manifest="$(mktemp)"
+git show "HEAD:$manifest" > "$old_manifest" 2>/dev/null || echo '[]' > "$old_manifest"
+
+while IFS= read -r name; do
+  dir="extensions/$name"
+  wasm="$dir/extension.wasm"
+  [ -f "$dir/Cargo.toml" ] || continue   # not a compiled extension
+
+  old="$(commit_of "$old_manifest" "$name")"
+  new="$(commit_of "$manifest" "$name")"
+
+  if [ -n "$new" ] && [ "$old" = "$new" ] && git cat-file -e "HEAD:$wasm" 2>/dev/null; then
+    echo "$name: unchanged ($new) — restoring committed extension.wasm"
+    git checkout HEAD -- "$wasm"
+    continue
+  fi
+
+  echo "$name: building ($old -> $new)"
+  out="$(mktemp -d)"
+  ( cd "$dir" && CARGO_TARGET_DIR="$out" cargo build --release --locked --target "$target" )
+  built="$(find "$out/$target/release" -maxdepth 1 -name '*.wasm' | head -1)"
+  [ -n "$built" ] || { echo "$name: no wasm produced" >&2; exit 1; }
+  cp "$built" "$wasm"
+  git add -f "$wasm"
+  rm -rf "$out"
+done < <(jq -r '.[].name' "$manifest")

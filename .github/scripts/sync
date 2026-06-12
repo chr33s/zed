@@ -1,0 +1,165 @@
+#!/usr/bin/env bash
+# Vendor Zed extensions declared in extensions.json and refresh the lock.
+#
+# extensions.json is an array of objects. You maintain "name" and "source"
+# (source may carry an optional "#<ref>" suffix to pin a branch, tag or commit).
+# For each entry this clones the source, pins the exact commit, vendors the full
+# tree into extensions/<name>/, and writes the resolved "commit", content
+# "checksum" and upstream "version" back into extensions.json — which doubles as
+# the lock file.
+#
+# Each extension's tree-sitter grammars (declared as [grammars.*] in its
+# extension.toml) are vendored as git submodules at extensions/<name>/grammars/
+# <grammar>/, pinned to the grammar's commit, with origin set to the grammar's
+# repository. Zed checks grammars out into exactly that path, so a pinned
+# submodule makes Zed build the grammar from our vendored copy. Run from the
+# repository root.
+set -euo pipefail
+
+manifest="extensions.json"
+ext_dir="extensions"
+
+test -f "$manifest"
+
+# Emit "name<TAB>repository<TAB>commit" for each [grammars.*] in a manifest.
+parse_grammars() { # <extension.toml>
+  awk '
+    function flush() {
+      if (name != "" && repo != "" && rev != "") print name "\t" repo "\t" rev
+      name = ""; repo = ""; rev = ""
+    }
+    /^\[grammars\.[^]]*\]/ {
+      flush(); name = $0
+      sub(/^\[grammars\./, "", name); sub(/\]$/, "", name); gsub(/"/, "", name)
+      in_grammar = 1; next
+    }
+    /^\[/ { flush(); in_grammar = 0 }
+    in_grammar && /^[[:space:]]*repository[[:space:]]*=/ {
+      v = $0; sub(/^[^=]*=[[:space:]]*/, "", v); gsub(/"/, "", v); sub(/[[:space:]]+$/, "", v); repo = v
+    }
+    in_grammar && /^[[:space:]]*(commit|rev)[[:space:]]*=/ {
+      v = $0; sub(/^[^=]*=[[:space:]]*/, "", v); gsub(/"/, "", v); sub(/[[:space:]]+$/, "", v); rev = v
+    }
+    END { flush() }
+  ' "$1"
+}
+
+# Ensure a pinned git submodule exists at <path> for <url>@<rev>.
+sync_grammar() { # <path> <url> <rev>
+  local gpath="$1" url="$2" rev="$3"
+  if git config -f .gitmodules --get "submodule.$gpath.url" >/dev/null 2>&1; then
+    [ "$(git config -f .gitmodules --get "submodule.$gpath.url")" = "$url" ] \
+      || git submodule set-url -- "$gpath" "$url"
+    [ -e "$gpath/.git" ] || git submodule update --init -- "$gpath" >/dev/null 2>&1 || true
+  else
+    git submodule add --force --depth 1 -- "$url" "$gpath" >/dev/null
+  fi
+  git -C "$gpath" fetch --depth 1 origin "$rev" >/dev/null 2>&1 \
+    || git -C "$gpath" fetch origin >/dev/null 2>&1 || true
+  git -C "$gpath" checkout --quiet "$rev"
+  git add -f -- "$gpath"
+}
+
+# Remove a vendored grammar submodule completely.
+drop_grammar() { # <path>
+  local gpath="$1"
+  git submodule deinit -f -- "$gpath" >/dev/null 2>&1 || true
+  git rm -f -- "$gpath" >/dev/null 2>&1 || rm -rf "$gpath"
+  rm -rf ".git/modules/$gpath"
+}
+
+# Names declared in the manifest (authored order preserved).
+names=()
+while IFS= read -r n; do names+=("$n"); done < <(jq -r '.[].name' "$manifest")
+
+# Prune any vendored extension dir no longer declared (with its grammars).
+if [ -d "$ext_dir" ]; then
+  for dir in "$ext_dir"/*/; do
+    [ -e "$dir" ] || continue
+    base="$(basename "$dir")"
+    keep=""
+    for n in "${names[@]}"; do [ "$n" = "$base" ] && keep=1; done
+    [ -n "$keep" ] && continue
+    for gp in "$dir"grammars/*/; do [ -e "$gp" ] && drop_grammar "${gp%/}"; done
+    rm -rf "$dir"
+  done
+fi
+mkdir -p "$ext_dir"
+
+# Paths of every grammar submodule that should exist after this run (newline
+# delimited, each wrapped in newlines so prefix/suffix matching is exact).
+desired=$'\n'
+
+count="$(jq 'length' "$manifest")"
+i=0
+while [ "$i" -lt "$count" ]; do
+  name="$(jq -r --argjson i "$i" '.[$i].name' "$manifest")"
+  source="$(jq -r --argjson i "$i" '.[$i].source' "$manifest")"
+  url="${source%%#*}"
+  ref=""
+  [ "$source" != "$url" ] && ref="${source#*#}"
+
+  work="$(mktemp -d)"
+  if [ -n "$ref" ]; then
+    git clone --quiet "$url" "$work"
+    git -C "$work" checkout --quiet "$ref"
+  else
+    git clone --quiet --depth 1 "$url" "$work"
+  fi
+  # Pin to exactly the commit we vendored (no time-of-check race).
+  commit="$(git -C "$work" rev-parse HEAD)"
+  rm -rf "$work/.git" "$work/grammars"
+
+  # Refresh the vendored source while preserving grammars/ (the submodules).
+  dest="$ext_dir/$name"
+  mkdir -p "$dest"
+  find "$dest" -mindepth 1 -maxdepth 1 ! -name grammars -exec rm -rf {} +
+  cp -R "$work/." "$dest/"
+  rm -rf "$work"
+
+  # Content checksum over the vendored source (grammars are pinned separately).
+  checksum="sha256:$(cd "$dest" && find . -type f -not -path './grammars/*' -print0 \
+    | LC_ALL=C sort -z \
+    | xargs -0 sha256sum \
+    | sha256sum \
+    | cut -d' ' -f1)"
+
+  # Best-effort upstream version from the vendored manifest.
+  version=""
+  if [ -f "$dest/extension.toml" ]; then
+    version="$(grep -E '^[[:space:]]*version[[:space:]]*=' "$dest/extension.toml" \
+      | head -1 \
+      | sed -E 's/.*=[[:space:]]*"?([^"#]*)"?.*/\1/' \
+      | tr -d '[:space:]')"
+  fi
+
+  # Write the resolved lock fields back into extensions.json.
+  tmp="$(mktemp)"
+  jq --tab --argjson i "$i" --arg c "$commit" --arg s "$checksum" --arg v "$version" \
+    '.[$i].commit = $c | .[$i].checksum = $s | .[$i].version = $v' "$manifest" > "$tmp"
+  mv "$tmp" "$manifest"
+
+  # Vendor this extension's grammars as pinned submodules.
+  if [ -f "$dest/extension.toml" ]; then
+    while IFS="$(printf '\t')" read -r gname grepo grev; do
+      [ -n "$gname" ] || continue
+      gpath="$dest/grammars/$gname"
+      sync_grammar "$gpath" "$grepo" "$grev"
+      desired="$desired$gpath"$'\n'
+    done < <(parse_grammars "$dest/extension.toml")
+  fi
+
+  i=$((i + 1))
+done
+
+# Drop grammar submodules that are no longer declared by any extension.
+if [ -f .gitmodules ]; then
+  while IFS= read -r gpath; do
+    [ -n "$gpath" ] || continue
+    case "$desired" in
+      *$'\n'"$gpath"$'\n'*) : ;;
+      *) drop_grammar "$gpath" ;;
+    esac
+  done < <(git config -f .gitmodules --get-regexp '^submodule\..*\.path$' | awk '{print $2}')
+  [ -f .gitmodules ] && git add -- .gitmodules
+fi

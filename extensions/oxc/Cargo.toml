@@ -1,0 +1,18 @@
+[package]
+name = "oxc-zed"
+version = "0.4.7"
+edition = "2024"
+license = "MIT"
+description = "Oxc Zed Extension"
+homepage = "https://github.com/oxc-project/oxc-zed"
+repository = "https://github.com/oxc-project/oxc-zed"
+publish = true
+
+[lib]
+crate-type = ["cdylib"]
+path = "src/oxc.rs"
+
+[dependencies]
+simple_logger = "5.1.0"
+log = "0.4.29"
+zed_extension_api = "0.7.0"

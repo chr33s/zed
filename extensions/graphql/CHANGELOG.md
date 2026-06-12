@@ -1,0 +1,39 @@
+# Changelog
+
+# 1.0.5 - 2026-06-09
+
+- Fix symbol picker (outline) showing nothing in GraphQL schema files. Capture all type system definitions and extensions instead of selection fields. Thanks @rishitells! #24
+
+# 1.0.4 - 2026-05-01
+
+- Fix language server failing to start on Node.js 22+ with `Cannot find module 'core-js/es6'`. Invoke `dist/cli.js` directly to bypass the deprecated `@babel/polyfill` require in the upstream `bin/graphql.js` wrapper.
+
+# 1.0.3 - 2025-09-30
+
+- Bump extension API, remove windows path workaround. Thanks @kubkon!
+
+# 1.0.2 - 2025-04-06
+
+- Fix GraphQL language server not starting on Windows
+
+# 1.0.1 - 2025-04-04
+
+- Make it work on windows
+
+# 1.0.0 - 2024-08-02
+
+- Add GraphQL language server with auto-completion and documentation support. Thanks @affanshahid
+
+# 0.0.3 - 2024-06-26
+
+- Add `graphqls` file extension for schema files. Thanks @isaacd9
+
+## 0.0.2 - 2024-04-12
+
+- Switch to my [fork](https://github.com/11bit/tree-sitter-graphql) of GraphQL treesitter grammar that supports escape sequences inside single line strings
+- Fix inconsistency in highlighting input vs other types property names #1
+- Add .gql as a recognized file extension
+
+## 0.0.1
+
+- Initial release

@@ -1,0 +1,51 @@
+[
+	{
+		"name": "oxc",
+		"source": "https://github.com/oxc-project/oxc-zed",
+		"commit": "c2d1202479d45b17c088ccca4c3d74253343b820",
+		"checksum": "sha256:7f2c8e73cb4096a569867b576c59573afc4e43889497cd9519712597bda2bd51",
+		"version": "0.4.7"
+	},
+	{
+		"name": "graphql",
+		"source": "https://github.com/11bit/zed-extension-graphql",
+		"commit": "1f346f7bc1c8519c263c08d8b4badad8dcfcb9fb",
+		"checksum": "sha256:7c359dc815c96e89ffdfeaa337ee028ade2fa17d8b823d65fe96e3569cfac836",
+		"version": "1.0.5"
+	},
+	{
+		"name": "liquid",
+		"source": "https://github.com/TheBeyondGroup/zed-shopify-liquid",
+		"commit": "6f6c178270ef3ef33472798c875ff6e5befa7ae4",
+		"checksum": "sha256:a72bc9345fa99c2fa22c11ba6a5f9233c08ea62e132e362182b1b035b21c2f2e",
+		"version": "0.7.0"
+	},
+	{
+		"name": "mermaid",
+		"source": "https://github.com/gabeins/zed-mermaid",
+		"commit": "9327f5d59cff3910402e13bd366ddc57d4213a03",
+		"checksum": "sha256:8f1f9b305f5b0659de7dc9b263ca36e6af8d1bda14feeca3eed4161cbe7b3f94",
+		"version": "0.1.0"
+	},
+	{
+		"name": "json5",
+		"source": "https://github.com/ChunzhengLab/json5-zed-extension",
+		"commit": "081db280d3f5e0c57c4c13ffa7db0c90e39bc7d3",
+		"checksum": "sha256:ccd69d9c36c4a9bdaaca58af91250397843f3c0089311e35e4dd6a9a128c75c5",
+		"version": "0.1.0"
+	},
+	{
+		"name": "jsonl",
+		"source": "https://github.com/vim-zz/jsonl-syntax-zed",
+		"commit": "024a1e9406d14bdc5dc52e3b8c9db6ca6d1c04fd",
+		"checksum": "sha256:80e92c16f9fe48ea9c5db2d253fae51c05f8cbed72a9503bf8f0ee340836439a",
+		"version": "0.2.0"
+	},
+	{
+		"name": "editorconfig",
+		"source": "https://github.com/notpeter/editorconfig-zed",
+		"commit": "4cb92cda2a589be7b26eae61f809d4c040ea3171",
+		"checksum": "sha256:074400d2720be2cd93bd8f629a15cd0e4ee97f4f5f8caff52c4a07cf2b47ffe2",
+		"version": "0.1.0"
+	}
+]
