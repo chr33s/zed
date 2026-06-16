@@ -1,0 +1,18 @@
+[submodule "extensions/graphql/grammars/graphql"]
+	path = extensions/graphql/grammars/graphql
+	url = https://github.com/11bit/tree-sitter-graphql
+[submodule "extensions/liquid/grammars/liquid"]
+	path = extensions/liquid/grammars/liquid
+	url = https://github.com/hankthetank27/tree-sitter-liquid
+[submodule "extensions/mermaid/grammars/mermaid"]
+	path = extensions/mermaid/grammars/mermaid
+	url = https://github.com/monaqa/tree-sitter-mermaid
+[submodule "extensions/json5/grammars/json5"]
+	path = extensions/json5/grammars/json5
+	url = https://github.com/Joakker/tree-sitter-json5
+[submodule "extensions/jsonl/grammars/json"]
+	path = extensions/jsonl/grammars/json
+	url = https://github.com/tree-sitter/tree-sitter-json
+[submodule "extensions/editorconfig/grammars/editorconfig"]
+	path = extensions/editorconfig/grammars/editorconfig
+	url = https://github.com/ValdezFOmar/tree-sitter-editorconfig
