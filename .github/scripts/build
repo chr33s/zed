@@ -39,7 +39,11 @@ while IFS= read -r name; do
 
   echo "$name: building ($old -> $new)"
   out="$(mktemp -d)"
-  ( cd "$dir" && CARGO_TARGET_DIR="$out" cargo build --release --locked --target "$target" )
+  # No --locked: extensions are vendored verbatim from upstream, and some ship a
+  # Cargo.lock that is stale relative to their Cargo.toml (e.g. a bumped package
+  # version). --locked aborts on such a mismatch; instead let cargo reconcile the
+  # lock before building.
+  ( cd "$dir" && CARGO_TARGET_DIR="$out" cargo build --release --target "$target" )
   built="$(find "$out/$target/release" -maxdepth 1 -name '*.wasm' | head -1)"
   [ -n "$built" ] || { echo "$name: no wasm produced" >&2; exit 1; }
   cp "$built" "$wasm"
