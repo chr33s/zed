@@ -2,8 +2,8 @@
 	{
 		"name": "oxc",
 		"source": "https://github.com/oxc-project/oxc-zed",
-		"commit": "d53324533d614038191b26985d12e564e8984218",
-		"checksum": "sha256:235ab4f4308ae1c62860eb35b6d95789db4be51ecf537ead00a73730729581cd",
+		"commit": "4b9013b70e833a41a59de32bac7b51a7a4e04b03",
+		"checksum": "sha256:5edfb1c1b614a97a8d3495d300c1421cac1d01690f1c7053932cbf531e724fa0",
 		"version": "0.4.7"
 	},
 	{
@@ -30,9 +30,9 @@
 	{
 		"name": "json5",
 		"source": "https://github.com/ChunzhengLab/json5-zed-extension",
-		"commit": "081db280d3f5e0c57c4c13ffa7db0c90e39bc7d3",
-		"checksum": "sha256:ccd69d9c36c4a9bdaaca58af91250397843f3c0089311e35e4dd6a9a128c75c5",
-		"version": "0.1.0"
+		"commit": "14e9d178d49adb9a2c609aade02b873d548b6671",
+		"checksum": "sha256:8f5deb52a48b78ae73ef96fab38c1e0f4fdf6b883fac2eebc3467101892e83a9",
+		"version": "0.1.1"
 	},
 	{
 		"name": "jsonl",

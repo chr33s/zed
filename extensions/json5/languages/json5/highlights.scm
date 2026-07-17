@@ -1,11 +1,23 @@
 (string) @string
 
-(identifier) @constant
+(identifier) @property.json_key
 
-(number) @constant.numeric
+(number) @number
 
 (null) @constant.builtin
 
-[(true) (false)] @constant.builtin.boolean
+[(true) (false)] @boolean
 
 (comment) @comment
+
+[
+  ","
+  ":"
+] @punctuation.delimiter
+
+[
+  "{"
+  "}"
+  "["
+  "]"
+] @punctuation.bracket
