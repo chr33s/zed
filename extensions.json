@@ -9,9 +9,9 @@
 	{
 		"name": "graphql",
 		"source": "https://github.com/11bit/zed-extension-graphql",
-		"commit": "1f346f7bc1c8519c263c08d8b4badad8dcfcb9fb",
-		"checksum": "sha256:7c359dc815c96e89ffdfeaa337ee028ade2fa17d8b823d65fe96e3569cfac836",
-		"version": "1.0.5"
+		"commit": "7337bb0ea46b0f71b0c29ef877e5d15ce5ad7252",
+		"checksum": "sha256:6ec70e3ce452ea9746009c3ea0af0b9172961ad580cd5f6d26f1f6b9497ca0ce",
+		"version": "1.0.6"
 	},
 	{
 		"name": "liquid",
