@@ -2,9 +2,9 @@
 	{
 		"name": "oxc",
 		"source": "https://github.com/oxc-project/oxc-zed",
-		"commit": "3bf952e751326513366fd717daa142607a622dc2",
-		"checksum": "sha256:7b5a4fd015a45a9ef3775ba1b303cdaab5c4ab5fe6143be327d48bf211af8118",
-		"version": "0.4.7"
+		"commit": "b603a414a83d9772fa8681187821084757c35379",
+		"checksum": "sha256:989fd6570fda18bd13db7771171919942386a33a59dff0398e2fc73fbf72c003",
+		"version": "0.4.8"
 	},
 	{
 		"name": "graphql",
