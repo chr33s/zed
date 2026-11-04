@@ -2,8 +2,8 @@
 	{
 		"name": "oxc",
 		"source": "https://github.com/oxc-project/oxc-zed",
-		"commit": "8c31710f838e1f0a9f0eb830c0aa4707a0d41f49",
-		"checksum": "sha256:daa3cade480b2740244277a021d8a5074832fec42acc28433220640868e2cc04",
+		"commit": "293a03ca75d110834b65b0e0e287b0e2aa001b54",
+		"checksum": "sha256:f7b9c85d9c7db2d489e07c27c93fe1dafd58aa0e48eda26157667c4a45543809",
 		"version": "0.4.9"
 	},
 	{
